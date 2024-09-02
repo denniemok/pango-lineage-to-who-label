@@ -244,25 +244,23 @@ You do not have to perform any of the following to do the conversion. The follow
 <details>
   <summary>More Details</summary>
 
-The following illustrates how the conversion table is derived:
-
 1. **Base List Creation**:
    - **Source**: Use the base list from the Covariants database (available at [Covariants.org](https://covariants.org/)).
    - **Purpose**: Establish initial mappings of PANGO lineages to WHO labels based on existing data.
 
 2. **Expand and Refine List**:
    - **Sources for Expansion**:
-     - GISAID and its resources (e.g., [GISAID](https://gisaid.org/), [GISAIDR GitHub](https://github.com/Wytamma/GISAIDR/blob/master/R/core.R)).
+     - GISAID and its resources (e.g., [GISAID]([https://gisaid.org/](https://gisaid.org/hcov19-variants/)), [GISAIDR](https://github.com/Wytamma/GISAIDR/blob/master/R/core.R)).
      - WHO updates and variant announcements (e.g., [WHO News](https://www.who.int/news/item/27-10-2022-tag-ve-statement-on-omicron-sublineages-bq.1-and-xbb)).
    - **Example Expansion**:
      - Alpha: `B.1.1.7 / Q.*`
      - Delta: `B.1.617.2 / AY.*`
      - Omicron: `B.1.1.529 / BA.*`
-   - **Rules**: Add new alias categories and merge sublineages for better generalization, such as merging `BA.*` and `XBB` under Omicron.
+   - **Rules**: Add direct aliases to the list and merge sublineages for better generalization, such as combining `BA.*` and `XBB` under Omicron.
 
 3. **Reference Table Creation**:
-   - **Source**: Extract data from PANGO consensus sequences summary available on GitHub ([PANGO Sequences Summary](https://github.com/corneliusroemer/pango-sequences/blob/main/data/pango-consensus-sequences_summary.json)).
-   - **Purpose**: Form a reference table (`nextstrain`) for aliasing and unaliasing PANGO lineages.
+   - **Source**: Extract data from [PANGO Consensus Sequences Summary](https://github.com/corneliusroemer/pango-sequences/blob/main/data/pango-consensus-sequences_summary.json) available on GitHub.
+   - **Purpose**: Form the reference table `nextstrain` for aliasing and unaliasing PANGO lineages.
 
 4. **Unaliasing Lineages**:
    - **SQL Query**:
@@ -270,7 +268,7 @@ The following illustrates how the conversion table is derived:
      SELECT a.lineage,
             a.wholabel,
             GROUP_CONCAT(DISTINCT b.unaliased) AS c
-     FROM   covariants AS a
+     FROM   annotation AS a
             LEFT JOIN nextstrain AS b
                    ON a.lineage = b.lineage
                     OR b.lineage LIKE a.lineage || '.%'
@@ -285,35 +283,40 @@ The following illustrates how the conversion table is derived:
      ```sql
      SELECT GROUP_CONCAT(DISTINCT a.lineage),
             GROUP_CONCAT(DISTINCT a.wholabel),
-            SUBSTR(b.lineage, 1, INSTR(b.lineage, '.') - 1) AS we,
+            SUBSTR(b.lineage, 1, INSTR(b.lineage, '.') - 1) AS plin,
             GROUP_CONCAT(b.lineage),
             GROUP_CONCAT(DISTINCT b.unaliased)
-     FROM   covariants AS a
+     FROM   annotation AS a
             LEFT JOIN nextstrain AS b
                    ON unaliased = a.lineage
                     OR unaliased LIKE a.lineage || '.%'
-     GROUP BY we
-     ORDER BY a.wholabel, we ASC;
+     GROUP BY plin
+     ORDER BY a.wholabel, plin ASC;
      ```
    - **Purpose**: Identify all possible aliases for a given lineage. Focus particularly on Omicron due to its extensive number of sublineages.
 
 6. **New Lineages Identification**:
    - **SQL Query**:
      ```sql
-     SELECT we,
+     WITH lineage_cte AS (
+         SELECT SUBSTR(lineage, 1, INSTR(lineage, '.') - 1) AS plin
+         FROM nextstrain
+         WHERE nextstrainclade LIKE '23_'
+           AND SUBSTR(lineage, 1, INSTR(lineage, '.') - 1) != ''
+         GROUP BY plin
+     )
+     SELECT plin,
             b.lineage
-     FROM   (SELECT SUBSTR(lineage, 1, INSTR(lineage, '.') - 1) AS we
-             FROM   nextstrain
-             WHERE  nextstrainclade LIKE '23_'
-                    AND we != ''
-             GROUP  BY we) AS a
-            LEFT JOIN covariants AS b
-                   ON b.lineage = a.we
-     WHERE  b.lineage IS NULL;
+     FROM lineage_cte AS a
+     LEFT JOIN covariants AS b
+         ON b.lineage = a.plin
+     WHERE b.lineage IS NULL;
      ```
    - **Purpose**: Check for new PANGO lineages that may not be present in the base list, focusing on Omicron variants which frequently introduce new lineages.
 
-Manual inspection is involved in each step to ensure accurate generalization and concise addition of new matching rules.
+Manual inspection is involved in each step to ensure accurate generalisation and concise addition of new matching rules.
+
+The file `mapping.core.csv` represents the final output of the process described above. The `generate_full_mapping.py` script is then executed to produce `mapping.full.json`.
 
 </details>
 
