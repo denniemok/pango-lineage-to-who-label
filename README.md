@@ -55,7 +55,7 @@ For instance, utilising our mapping allows for the correct labeling of more than
 
 ### Data Structure
 
-`mapping.core.csv` contains only the necessary matching rules. For example, `B.1.1.7 -> Alpha` means both `B.1.1.7` and `B.1.1.7.*` map to Alpha. All sublineages of `B.1.1.7` (i.e., `B.1.1.7.*`) are not part of the core mapping entries to better generalise the lookup.
+`mapping.core.csv` contains only the necessary matching rules. For example, `B.1.1.7 -> Alpha` means both `B.1.1.7` and `B.1.1.7.*` map to Alpha. All sublineages of `B.1.1.7` (i.e., `B.1.1.7.*`) are not explicitly stored in the table to better generalise the lookup.
 
 ```sh
 +-----------+------------+
