@@ -22,7 +22,7 @@ For instance, utilising our mapping allows for the correct labeling of more than
 <details>
   <summary>What are WHO Labels?</summary>
   <br>
-  The WHO label is a standardized nomenclature used by the World Health Organization (WHO) to classify and refer to different COVID-19 variants. By utilising Greek alphabet (e.g., Alpha, Beta, Gamma, Delta, Omicron), it simplifies communication and help the general public, media, and health officials easily understand and refer to these variants.
+  WHO label is a standardized nomenclature used by the World Health Organization (WHO) to classify and refer to different COVID-19 variants. By utilising Greek alphabet (e.g., Alpha, Beta, Gamma, Delta, Omicron), it simplifies communication and help the general public, media, and health officials easily understand and refer to these variants.
   <br><br>
 </details>
 
@@ -47,7 +47,7 @@ For instance, utilising our mapping allows for the correct labeling of more than
   <br>
   Alias mapping is the process of finding aliases of a PANGO lineage. This involves identifying the shorter, simplified alias that corresponds to a more complex lineage name in the PANGO system.
   <br><br>
-  For example, apping "B.1.1.529.1" to its alias "BA.1" would be considered alias mapping.
+  For example, mapping "B.1.1.529.1" to its shorter alias "BA.1" would be considered alias mapping.
   <br><br>
 </details>
 
