@@ -6,13 +6,21 @@ mapping = dict()
 with open('mapping.core.csv') as csvfile:
     data = list(csv.reader(csvfile))
 
-# populate mapping dictioanry
+# populate mapping dictionary
 for i in data:
     mapping[i[0]] = i[1]
 
 # compute wholabel mapping
 def get_wholabel(lineage):
+    """
+    retrieve the WHO label for a given lineage.
 
+    args:
+        lineage (str): the lineage to look up.
+
+    returns:
+        str or None: the WHO label if found, otherwise None.
+    """
     # split with respect to sublineages
     cpn = lineage.split('.')
 
@@ -22,17 +30,18 @@ def get_wholabel(lineage):
         if sub in mapping:
             print(f"matched: {sub}")
             return mapping[sub]
-        
-    # return nothing if no matches found
+    
+    # return None if no matches found
     return None
-
 
 # iteratively ask for user input
 while True:
-
-    try: # prompt for user input
+    try:
+        # prompt for user input
         a = input("\nEnter a PANGO lineage: ")
-    except KeyboardInterrupt: # terminate with Ctrl+C
+    except KeyboardInterrupt:
+        # terminate with Ctrl+C
+        print("\nTerminating program.")
         break
 
     # get wholabel

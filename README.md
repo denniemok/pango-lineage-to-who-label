@@ -1,10 +1,10 @@
 # PANGO Lineage -> WHO Label Conversion for COVID-19 Analysis
 
-This project aims to provide a comprehensive conversion table that maps PANGO lineages (like `B.1.1.529` and `AY.2`) to their corresponding WHO labels (like `Omicron` and `Delta`).
+This project aims to provide a comprehensive conversion scheme that maps PANGO lineages (like `B.1.1.529` and `AY.2`) to their corresponding WHO labels (like `Omicron` and `Delta`).
 
 The ability to swiftly convert between PANGO lineages and WHO labels can streamline data analysis, facilitating broader COVID-19 variant-based studies that bridge the gap between scientific research and public discourse.
 
-For instance, utilising our mapping allows for the correct labeling of more than 85% of GISAID EpiCoV records (tested with over 200k entries from the Australian dataset). The remaining unlabeled records may belong to recombinant lineages, newly identified lineages, lineages not labeled by WHO, or records without a lineage designation.
+For instance, utilising our mapping allows for the correct labeling of more than 85% of [GISAID EpiCoV](https://gisaid.org/) records (tested with over 200k Australia entries). The remaining unlabeled records may belong to recombinant lineages, newly identified lineages, lineages not labeled by WHO, or records without a lineage designation.
 
 <details>
   <summary>Supported WHO Labels</summary>
@@ -22,7 +22,7 @@ For instance, utilising our mapping allows for the correct labeling of more than
 <details>
   <summary>What are WHO Labels?</summary>
   <br>
-  WHO label is a standardized nomenclature used by the World Health Organization (WHO) to classify and refer to different COVID-19 variants. By utilising Greek alphabet (e.g., Alpha, Beta, Gamma, Delta, Omicron), it simplifies communication and help the general public, media, and health officials easily understand and refer to these variants.
+  WHO label is a standardized nomenclature used by the World Health Organization (WHO) to classify and refer to different COVID-19 variants. By utilising Greek alphabets (e.g., Alpha, Beta), it simplifies communication and help the general public, media, and health officials easily understand and refer to these variants.
   <br><br>
 </details>
 
@@ -55,7 +55,7 @@ For instance, utilising our mapping allows for the correct labeling of more than
 
 ### Data Structure
 
-`mapping.core.csv` contains only the necessary matching rules. For example, `B.1.1.7 -> Alpha` means both `B.1.1.7` and `B.1.1.7.*` map to Alpha. All sublineages of `B.1.1.7` (i.e., `B.1.1.7.*`) are not explicitly stored in the table to better generalise the lookup.
+`mapping.core.csv` contains only the necessary matching rules. For example, `B.1.1.7 -> Alpha` means both `B.1.1.7` and `B.1.1.7.*` map to Alpha. Sublineages of `B.1.1.7` (i.e., `B.1.1.7.*`) are not explicitly stored in the table to allow more generalisation in the lookup process.
 
 ```sh
 +-----------+------------+
@@ -74,41 +74,57 @@ For instance, utilising our mapping allows for the correct labeling of more than
 
 PANGO to WHO mapping in this approach is done by approximately matching each record's lineage field in your data with our mapping table. Approximate matching means finding the most specific match.
 
-#### Example Lookup Algorithm Using CSV
+#### Example Lookup Algorithm with CSV
 ```py
-mapping = {"BA.2": "Omicron", "AY.2": "Delta", ...} # csv tansformed to dict
+# dictionary created from CSV transformation
+mapping = {
+    "BA.2": "Omicron",
+    "AY.2": "Delta",
+    ...
+}
 
 def get_wholabel(lineage):
+    # split the lineage by periods to handle hierarchical structure
     cpn = lineage.split('.')
+    # iterate over the parts of the lineage in reverse order
     for i in reversed(range(len(cpn))):
-        sub = '.'.join(cpn[:i+1])
+        sub = '.'.join(cpn[:i + 1])
         if sub in mapping:
             return mapping[sub]
+    # return Unknown if no match is found
     return "Unknown"
 ```
 
-#### Example Lookup Algorithm Using SQL
+#### Example Lookup Algorithm with SQL
 ```sql
 LEFT JOIN 
-    mapping AS b -- mapping table provided by this repo
+    mapping -- mapping table provided by this repo
 ON 
-    ori_lineage = b.lineage
-    OR ori_lineage LIKE b.lineage || '.%'
+    mapping.lineage = (
+        SELECT 
+            lineage
+        FROM 
+            mapping
+        WHERE 
+            lineage = ori_lineage
+            OR ori_lineage LIKE mapping.lineage || '.%'
+        ORDER BY 
+            lineage DESC
+        LIMIT 1
+    )
 ```
 
 Using only strict lookups on core mapping tables will significantly reduce the labeling outcomes.
 
 ### Tradeoff in Practice
 
-The advantage of Approximate Lookup is the optimized table size at the expense of more computation during lookup. It can generalize the matching by considering all sublineages.
+Approximate Lookup can generalize the matching by considering all sublineages, but at the expense of more computation during lookup.
 
 ## Strict Lookup (Full Mapping)
 
 ### Data Structure
 
 `mapping.full.json` compiles mapping entries from a full list of commonly known lineages obtained [here](https://github.com/corneliusroemer/pango-sequences). This approach requires no approximate matching; a simple equality lookup on the mapping table keys suffices.
-
-The `.json` file is generated using `generate_full_mapping.py`, including additional details such as nextstrainClade, aliasing, and unaliasing info from the mentioned dataset.
 
 ```json
 {
@@ -128,34 +144,47 @@ The `.json` file is generated using `generate_full_mapping.py`, including additi
 }
 ```
 
+The file is generated using `generate_full_mapping.py`. Additional details such as nextstrainClade, aliasing, and unaliasing info are obtained from the above linked dataset.
+
 ### Lookup Process
 
 PANGO to WHO mapping in this approach is done by a simple equality match on the lookup keys.
 
-#### Example Lookup Algorithm Using JSON
+#### Example Lookup Algorithm with JSON
 ```py
-mapping = {"AY.86": {"aliased": "AY.86", "nextclade": "21J", "unaliased": "B.1.617.2.86", "wholabel": "Delta"}, ...} # json tansformed to dict
+# dictionary created from JSON transformation
+mapping = {
+    "AY.86": {
+        "aliased": "AY.86",
+        "nextclade": "21J",
+        "unaliased": "B.1.617.2.86",
+        "wholabel": "Delta"
+    },
+    ...
+}
 
 def get_wholabel(lineage):
+    # check if the lineage is in the mapping dictionary
     if lineage in mapping:
         return mapping[lineage]['wholabel']
+    # return Unknown if the lineage is not found
     return "Unknown"
 ```
 
-You may also use approximate lookup on this `.json` file to improve labeling accuracy at the expense of performance.
+You may use approximate lookup on this `.json` file to improve labeling accuracy at the expense of performance.
 
 ### Tradeoff in Practice
 
-The advantage of Strict Lookup is efficient lookup speed. However, the lookup table requires more storage space and may take longer to download and use.
+Strict Lookup offers efficient retrieval but may omit sublineages not included in the predefined definitions.
 
 ## How to use?
 
 ### Excel Spreadsheet
 
 1. Download `mapping.core.csv`.
-2. Copy the data from the `.csv` file into a new worksheet in your Excel file containing the data to be mapped.
-3. Sort the copied data in ascending order with respect to the first column.
-4. Assuming the `mapping` worksheet contains the data from the `.csv`, and the `data` worksheet contains your data with the lineage column, apply the following formula in the `data` worksheet:
+2. Copy the data from the `.csv` file into a new worksheet named `mapping` in your Excel file that contains the data to be mapped.
+3. Sort data in the `mapping` worksheet in ascending order based on the first column.
+4. Assuming the `data` worksheet contains your data with the lineage column, apply the following formula in the `data` worksheet:
     ```
     =IF(ISNUMBER(SEARCH(INDEX(mapping!A:A, MATCH(C2, mapping!A:A, 1)), C2)), INDEX(mapping!B:B, MATCH(C2, mapping!A:A, 1)), "Unknown")
     ```
@@ -167,7 +196,7 @@ Refer to `excel_example.xlsx` in the `examples` folder for a practical demonstra
 
 1. Download `mapping.core.sql` or `mapping.core.csv`.
 2. Create an instance of the mapping table in your database by either importing the `.csv` file or running the SQL commands in the `.sql` file. Name this table `mapping`.
-3. Assuming the `data` table contains your data with the lineage column, create a new view or table in your database using the following query:
+3. Assuming the `data` table contains your data with the lineage column, create a new materialised view or table in your database using the following query:
     ```sql
     CREATE TABLE dataview AS
     SELECT 
@@ -181,8 +210,18 @@ Refer to `excel_example.xlsx` in the `examples` folder for a practical demonstra
     LEFT JOIN 
         mapping AS b -- mapping table provided by this repo
     ON 
-        ori_lineage = b.lineage
-        OR ori_lineage LIKE b.lineage || '.%'
+        b.lineage = (
+            SELECT 
+                lineage
+            FROM 
+                mapping
+            WHERE 
+                lineage = ori_lineage -- strict match
+                OR ori_lineage LIKE b.lineage || '.%' -- approximate match
+            ORDER BY 
+                lineage DESC -- most specific match
+            LIMIT 1
+        );
     ```
     The above query is provided in `examples/maping_query.sql`.
 

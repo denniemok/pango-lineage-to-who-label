@@ -1,4 +1,5 @@
-BEGIN TRANSACTION;
+BEGIN TRANSACTION; -- sqlite
+-- START TRANSACTION; -- mysql
 
 CREATE TABLE IF NOT EXISTS mapping (
 	lineage	    TEXT,

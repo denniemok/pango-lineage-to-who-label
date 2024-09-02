@@ -4,16 +4,24 @@ import csv
 
 # get lineage metadata summary
 response = requests.get('https://github.com/corneliusroemer/pango-sequences/raw/main/data/pango-consensus-sequences_summary.json')
-response.raise_for_status()
+response.raise_for_status()  # ensure we handle HTTP errors
 lineages = response.json()
 
-# initialise dictionary
+# initialise dictionaries
 results = dict()
 mapping = dict()
 
 # compute wholabel mapping
 def get_wholabel(lineage):
+    """
+    retrieve the WHO label for a given lineage.
 
+    args:
+        lineage (str): The lineage to look up.
+
+    returns:
+        str: The WHO label if found, otherwise 'Unknown'.
+    """
     # split with respect to sublineages
     cpn = lineage.split('.')
 
@@ -22,11 +30,11 @@ def get_wholabel(lineage):
         sub = '.'.join(cpn[:i+1])
         if sub in mapping:
             return mapping[sub]
-        
-    # return Unknown if no matches found
+    
+    # return 'Unknown' if no matches found
     return 'Unknown'
 
-# laod core mapping dataset
+# load core mapping dataset
 with open('mapping.core.csv') as csvfile:
     data = list(csv.reader(csvfile))
 
@@ -36,22 +44,23 @@ for i in data:
 
 # populate result set
 for x, y in lineages.items():
-
-    results[x] = {}
-    results[x]['nextclade'] = y['nextstrainClade']
-    results[x]['wholabel'] = get_wholabel(x)
-    results[x]['unaliased'] = y['unaliased']
-    results[x]['aliased'] = x
+    results[x] = {
+        'nextclade': y['nextstrainClade'],
+        'wholabel': get_wholabel(x),
+        'unaliased': y['unaliased'],
+        'aliased': x
+    }
 
     z = y['unaliased'] 
 
     # put unaliased entries as separate entries to facilitate searching
     if z not in results:
-        results[z] = {}
-        results[z]['nextclade'] = y['nextstrainClade']
-        results[z]['wholabel'] = get_wholabel(z)
-        results[z]['unaliased'] = y['unaliased']
-        results[z]['aliased'] = x
+        results[z] = {
+            'nextclade': y['nextstrainClade'],
+            'wholabel': get_wholabel(z),
+            'unaliased': y['unaliased'],
+            'aliased': x
+        }
 
 # write result set to file
 with open('mapping.full.json', 'w') as fp:

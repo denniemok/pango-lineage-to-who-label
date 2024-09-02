@@ -1,17 +1,24 @@
 CREATE TABLE dataview AS
 SELECT 
-    a.year,
-    a.month,
-    COALESCE(a.lineage, 'Unknown') AS ori_lineage,
+    a.year, -- data columns from your data table
+    a.month, -- data columns from your data table
+    COALESCE(a.lineage, 'Unknown') AS ori_lineage, -- lineage colun from your data table
     COALESCE(b.lineage, 'Unknown') AS ref_lineage,
     COALESCE(b.wholabel, 'Unknown')
 FROM 
-    data AS a
+    data AS a -- your data table
 LEFT JOIN 
-    mapping AS b
+    mapping AS b -- mapping table provided by this repo
 ON 
-    ori_lineage = b.lineage
-    OR ori_lineage LIKE b.lineage || '.%'
-ORDER BY 
-    a.year ASC, 
-    a.month ASC;
+    b.lineage = (
+        SELECT 
+            lineage
+        FROM 
+            mapping
+        WHERE 
+            lineage = ori_lineage -- strict match
+            OR ori_lineage LIKE b.lineage || '.%' -- approximate match
+        ORDER BY 
+            lineage DESC -- most specific match
+        LIMIT 1
+    );
