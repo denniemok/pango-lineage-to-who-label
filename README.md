@@ -1,4 +1,4 @@
-# Convert PANGO Lineage to WHO Label for COVID-19 Analysis
+# PANGO Lineage -> WHO Label Conversion for COVID-19 Analysis
 
 This project aims to provide a comprehensive conversion table that maps PANGO lineages (like `B.1.1.529` and `AY.2`) to their corresponding WHO labels (like `Omicron` and `Delta`).
 
@@ -76,7 +76,7 @@ PANGO to WHO mapping in this approach is done by approximately matching each rec
 
 #### Example Lookup Algorithm Using CSV
 ```py
-mapping = {"BA.2": "Omicron", "AY.2": "Delta", ...}
+mapping = {"BA.2": "Omicron", "AY.2": "Delta", ...} # csv tansformed to dict
 
 def get_wholabel(lineage):
     cpn = lineage.split('.')
@@ -134,11 +134,11 @@ PANGO to WHO mapping in this approach is done by a simple equality match on the 
 
 #### Example Lookup Algorithm Using JSON
 ```py
-mapping = {"BA.2": "Omicron", "AY.2": "Delta", ...}
+mapping = {"AY.86": {"aliased": "AY.86", "nextclade": "21J", "unaliased": "B.1.617.2.86", "wholabel": "Delta"}, ...} # json tansformed to dict
 
 def get_wholabel(lineage):
     if lineage in mapping:
-        return mapping[lineage]
+        return mapping[lineage]['wholabel']
     return "Unknown"
 ```
 
@@ -154,7 +154,8 @@ The advantage of Strict Lookup is efficient lookup speed. However, the lookup ta
 
 1. Download `mapping.core.csv`.
 2. Copy the data from the `.csv` file into a new worksheet in your Excel file containing the data to be mapped.
-3. Assuming the `mapping` worksheet contains the data from the `.csv`, and the `data` worksheet contains your data with the lineage column, apply the following formula in the `data` worksheet:
+3. Sort the copied data in ascending order with respect to the first column.
+4. Assuming the `mapping` worksheet contains the data from the `.csv`, and the `data` worksheet contains your data with the lineage column, apply the following formula in the `data` worksheet:
     ```
     =IF(ISNUMBER(SEARCH(INDEX(mapping!A:A, MATCH(C2, mapping!A:A, 1)), C2)), INDEX(mapping!B:B, MATCH(C2, mapping!A:A, 1)), "Unknown")
     ```
