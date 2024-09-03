@@ -216,7 +216,7 @@ You do not have to perform any of the following to do the conversion. The follow
 
 2. **Base List Refinement**:
    - **Sources for Expansion**:
-     - [GISAID]([https://gisaid.org/](https://gisaid.org/hcov19-variants/))
+     - [GISAID](https://gisaid.org/hcov19-variants/)
      - [GISAIDR](https://github.com/Wytamma/GISAIDR/blob/master/R/core.R)
      - [WHO News](https://www.who.int/news/item/27-10-2022-tag-ve-statement-on-omicron-sublineages-bq.1-and-xbb)
    - **Example Expansion**:
