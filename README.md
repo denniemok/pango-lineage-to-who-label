@@ -106,13 +106,13 @@ Approximate Lookup offers a better labeling coverage by considering all sublinea
 
 ```json
 {
-    "AY.86": {
+    "B.1.617.2.86": {
         "aliased": "AY.86",
         "nextclade": "21J",
         "unaliased": "B.1.617.2.86",
         "wholabel": "Delta"
     },
-    "BN.1.2": {
+    "B.1.1.529.2.75.5.1.2": {
         "aliased": "BN.1.2",
         "nextclade": "22D",
         "unaliased": "B.1.1.529.2.75.5.1.2",
