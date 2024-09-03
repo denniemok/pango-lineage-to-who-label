@@ -3471,13 +3471,13 @@
         "aliased": "P.2",
         "nextclade": "20B",
         "unaliased": "B.1.1.28.2",
-        "wholabel": "Unknown"
+        "wholabel": "Zeta"
     },
     "B.1.1.28.3": {
         "aliased": "P.3",
         "nextclade": "21E",
         "unaliased": "B.1.1.28.3",
-        "wholabel": "Unknown"
+        "wholabel": "Theta"
     },
     "B.1.1.28.4": {
         "aliased": "P.4",
@@ -33345,67 +33345,67 @@
         "aliased": "MP.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.7.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MP.1.1": {
         "aliased": "MP.1.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.7.1.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MQ.1": {
         "aliased": "MQ.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.7.8.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MQ.2": {
         "aliased": "MQ.2",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.7.8.2",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MR.1": {
         "aliased": "MR.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.11.1.3.3.4.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MS.1": {
         "aliased": "MS.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.42.2.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MT.1": {
         "aliased": "MT.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.16.4.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MU.1": {
         "aliased": "MU.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.11.1.1.1.5.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MV.1": {
         "aliased": "MV.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.49.1.1.1.1.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MW.1": {
         "aliased": "MW.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.11.1.2.3.7.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "MY.1": {
         "aliased": "MY.1",
         "nextclade": "23I",
         "unaliased": "B.1.1.529.2.86.1.1.11.1.3.1.8.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "N.1": {
         "aliased": "N.1",
@@ -33609,13 +33609,13 @@
         "aliased": "P.2",
         "nextclade": "20B",
         "unaliased": "B.1.1.28.2",
-        "wholabel": "Unknown"
+        "wholabel": "Zeta"
     },
     "P.3": {
         "aliased": "P.3",
         "nextclade": "21E",
         "unaliased": "B.1.1.28.3",
-        "wholabel": "Unknown"
+        "wholabel": "Theta"
     },
     "P.4": {
         "aliased": "P.4",
@@ -40665,13 +40665,13 @@
         "aliased": "XEC",
         "nextclade": "23I",
         "unaliased": "XEC",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "XEC.1": {
         "aliased": "XEC.1",
         "nextclade": "23I",
         "unaliased": "XEC.1",
-        "wholabel": "Unknown"
+        "wholabel": "Omicron"
     },
     "XED": {
         "aliased": "XED",

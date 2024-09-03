@@ -1,15 +1,19 @@
-# PANGO Lineage -> WHO Label Conversion for COVID-19 Analysis
+# PANGO Lineage -> WHO Label for COVID-19 Analysis
 
-This project aims to provide a comprehensive conversion scheme that maps PANGO lineages (like `B.1.1.529` and `AY.2`) to their corresponding WHO labels (like `Omicron` and `Delta`).
+This project aims to provide a generalised conversion scheme that maps PANGO lineages (like `B.1.1.529` and `AY.2`) to their corresponding WHO labels or names (like `Omicron` and `Delta`).
 
-The ability to swiftly convert between PANGO lineages and WHO labels can streamline data analysis, facilitating broader COVID-19 variant-based studies that bridge the gap between scientific research and public discourse.
+The ability to swiftly convert between PANGO lineages and WHO labels can streamline data analysis and make COVID-19 statistics more accessible to the general public and non-specialists.
 
-For instance, utilising our mapping allows for the correct labeling of more than 85% of [GISAID EpiCoV](https://gisaid.org/) records (tested with over 200k Australia entries). The remaining unlabeled records may belong to recombinant lineages, newly identified lineages, lineages not labeled by WHO, or records without a lineage designation.
+For instance, using our mapping scheme allows for the correct labeling of more than 85% of [GISAID EpiCoV](https://gisaid.org/) records (tested with over 200,000 entries from Australia). The remaining unlabeled records may belong to recombinant lineages, newly identified lineages, lineages not labeled by WHO, or records without a lineage designation.
+
+<h3>Core Mapping List: <a href="https://github.com/denniemok/pango-lineage-to-who-label/blob/main/mapping.core.csv">mapping.core.csv</a> | <a href="https://github.com/denniemok/pango-lineage-to-who-label/blob/main/mapping.core.sql">mapping.core.sql</a> (03Sep24)</h3>
+
+<h3>Full Mapping List: <a href="https://github.com/denniemok/pango-lineage-to-who-label/blob/main/mapping.full.json">mapping.full.json</a> (03Sep24)</h3>
 
 <details>
   <summary>Supported WHO Labels</summary>
   <br>
-  Alpha, Beta, Delta, Epsilon, Eta, Gamma, Iota, Kappa, Lambda, Mu, Omicron
+  Alpha, Beta, Gamma, Delta, Epsilon, Zeta, Eta, Theta, Iota, Kappa, Lambda, Mu, Omicron
   <br><br>
 </details>
 
@@ -43,9 +47,9 @@ For instance, utilising our mapping allows for the correct labeling of more than
 </details>
 
 <details>
-  <summary>Lineage Alias Mapping</summary>
+  <summary>Lineage Aliasing</summary>
   <br>
-  Alias mapping is the process of finding aliases of a PANGO lineage. This involves identifying the shorter, simplified alias that corresponds to a more complex lineage name in the PANGO system.
+  Aliasing is the process of finding aliases of a PANGO lineage. This involves identifying the shorter, simplified alias that corresponds to a more complex lineage name in the PANGO system.
   <br><br>
   For example, mapping "B.1.1.529.1" to its shorter alias "BA.1" would be considered alias mapping.
   <br><br>
@@ -55,15 +59,15 @@ For instance, utilising our mapping allows for the correct labeling of more than
 
 ### Data Structure
 
-`mapping.core.csv` contains only the necessary matching rules. For example, `B.1.1.7 -> Alpha` means both `B.1.1.7` and `B.1.1.7.*` map to Alpha. Sublineages of `B.1.1.7` (i.e., `B.1.1.7.*`) are not explicitly stored in the table to allow more generalisation in the lookup process.
+`mapping.core.csv` contains only the **necessary** and **generalised** matching rules. For example, `B.1.1.7 -- Alpha` means both `B.1.1.7` and `B.1.1.7.*` map to Alpha. Sublineages of `B.1.1.7` (i.e., `B.1.1.7.*`) are not explicitly stored in the table to allow the largest descendant coverage in the lookup process.
 
 ```sh
 +-----------+------------+
 |  Lineage  |  wholabel  |
 +-----------+------------+
-|  B.1.1.7  |  Alpha     | # B.1.1.7 + B.1.7.* -> Alpha
-|  Q        |  Alpha     | # Q + Q.* -> Alpha
-|  B.1.351  |  Beta      | # B.1.351 + B.1.351.* -> Beta
+|  AY       |  Delta     | # AY + AY.* -> Delta
+|  BB       |  Mu        | # BB + BB.* -> Mu
+|  BA       |  Omicron   | # BA + BA.* -> Omicron
 |  ...      |  ...       |
 +-----------+------------+
 ```
@@ -74,15 +78,8 @@ For instance, utilising our mapping allows for the correct labeling of more than
 
 PANGO to WHO mapping in this approach is done by approximately matching each record's lineage field in your data with our mapping table. Approximate matching means finding the most specific match.
 
-#### Example Lookup Algorithm with CSV
+#### Example Lookup Algorithm
 ```py
-# dictionary created from CSV transformation
-mapping = {
-    "BA.2": "Omicron",
-    "AY.2": "Delta",
-    ...
-}
-
 def get_wholabel(lineage):
     # split the lineage by periods to handle hierarchical structure
     cpn = lineage.split('.')
@@ -90,41 +87,22 @@ def get_wholabel(lineage):
     for i in reversed(range(len(cpn))):
         sub = '.'.join(cpn[:i + 1])
         if sub in mapping:
-            return mapping[sub]
+            return mapping.get(sub)
     # return Unknown if no match is found
     return "Unknown"
-```
-
-#### Example Lookup Algorithm with SQL
-```sql
-LEFT JOIN 
-    mapping -- mapping table provided by this repo
-ON 
-    mapping.lineage = (
-        SELECT 
-            lineage
-        FROM 
-            mapping
-        WHERE 
-            lineage = ori_lineage
-            OR ori_lineage LIKE mapping.lineage || '.%'
-        ORDER BY 
-            lineage DESC
-        LIMIT 1
-    )
 ```
 
 Using only strict lookups on core mapping tables will significantly reduce the labeling outcomes.
 
 ### Tradeoff in Practice
 
-Approximate Lookup can generalize the matching by considering all sublineages, but at the expense of more computation during lookup.
+Approximate Lookup offers a better labeling coverage by considering all sublineages in matching, but at the expense of more computation during lookup.
 
 ## Strict Lookup (Full Mapping)
 
 ### Data Structure
 
-`mapping.full.json` compiles mapping entries from a full list of commonly known lineages obtained [here](https://github.com/corneliusroemer/pango-sequences). This approach requires no approximate matching; a simple equality lookup on the mapping table keys suffices.
+`mapping.full.json` compiles mapping entries from a full list of commonly known lineages obtained [here](https://github.com/cov-lineages/lineages-website/blob/master/_data/lineage_data.full.json). This approach requires no approximate matching; a simple equality lookup on the mapping table keys suffices.
 
 ```json
 {
@@ -139,34 +117,22 @@ Approximate Lookup can generalize the matching by considering all sublineages, b
         "nextclade": "22D",
         "unaliased": "B.1.1.529.2.75.5.1.2",
         "wholabel": "Omicron"
-    },
-    ...
+    }
 }
 ```
 
-The file is generated using `generate_full_mapping.py`. Additional details such as nextstrainClade, aliasing, and unaliasing info are obtained from the above linked dataset.
+The file is generated using `generate_full_mapping.py`. Additional details such as nextstrainClade, aliasing, and unaliasing info are obtained from [this](https://github.com/corneliusroemer/pango-sequences/blob/main/data/pango-consensus-sequences_summary.json) dataset.
 
 ### Lookup Process
 
 PANGO to WHO mapping in this approach is done by a simple equality match on the lookup keys.
 
-#### Example Lookup Algorithm with JSON
+#### Example Lookup Algorithm
 ```py
-# dictionary created from JSON transformation
-mapping = {
-    "AY.86": {
-        "aliased": "AY.86",
-        "nextclade": "21J",
-        "unaliased": "B.1.617.2.86",
-        "wholabel": "Delta"
-    },
-    ...
-}
-
 def get_wholabel(lineage):
-    # check if the lineage is in the mapping dictionary
+    # check if the lineage is in the lookup dictionary
     if lineage in mapping:
-        return mapping[lineage]['wholabel']
+        return mapping.get(lineage)
     # return Unknown if the lineage is not found
     return "Unknown"
 ```
@@ -175,7 +141,7 @@ You may use approximate lookup on this `.json` file to improve labeling accuracy
 
 ### Tradeoff in Practice
 
-Strict Lookup offers efficient retrieval but may omit sublineages not included in the predefined definitions.
+Strict Lookup offers efficient retrieval but may omit sublineages or ancestors not included in the predefined definitions.
 
 ## How to use?
 
@@ -190,7 +156,7 @@ Strict Lookup offers efficient retrieval but may omit sublineages not included i
     ```
     Replace `C2` with the cell containing the lineage data.
 
-Refer to `excel_example.xlsx` in the `examples` folder for a practical demonstration.
+Refer to `excel_example.xlsx` in the `example` folder for a practical demonstration.
   
 ### SQL Database
 
@@ -217,19 +183,19 @@ Refer to `excel_example.xlsx` in the `examples` folder for a practical demonstra
                 mapping
             WHERE 
                 lineage = ori_lineage -- strict match
-                OR ori_lineage LIKE b.lineage || '.%' -- approximate match
+                OR ori_lineage LIKE lineage || '.%' -- approximate match
             ORDER BY 
                 lineage DESC -- most specific match
             LIMIT 1
         );
     ```
-    The above query is provided in `examples/maping_query.sql`.
+    The above query is provided in `example/maping_query.sql`.
 
-Refer to `sqlite_example.db` in the `examples` folder for a practical demonstration using a SQLite Database.
+Refer to `sqlite_example.db` in the `example` folder for a practical demonstration using a SQLite Database.
 
 ### Programming (CSV & JSON with Python)
 
-We have provided two sample scripts in the `examples` folder to get you started.
+We have provided two sample scripts in the `example` folder to get you started.
 
 - `get_wholabel_from_csv.py`: Example script using the CSV file with Approximate Lookup. It takes a lineage input and outputs the WHO label. The script uses the `mapping.core.csv` file.
 
@@ -245,40 +211,42 @@ You do not have to perform any of the following to do the conversion. The follow
   <summary>More Details</summary>
 
 1. **Base List Creation**:
-   - **Source**: Use the base list from the Covariants database (available at [Covariants.org](https://covariants.org/)).
-   - **Purpose**: Establish initial mappings of PANGO lineages to WHO labels based on existing data.
+   - **Source**: Utilise definitions from [CoVariants](https://covariants.org/) and [Wikipedia](https://en.wikipedia.org/wiki/Variants_of_SARS-CoV-2).
+   - **Purpose**: Establish initial mappings of PANGO lineages to WHO labels based on consensus data.
 
-2. **Expand and Refine List**:
+2. **Base List Refinement**:
    - **Sources for Expansion**:
-     - GISAID and its resources (e.g., [GISAID]([https://gisaid.org/](https://gisaid.org/hcov19-variants/)), [GISAIDR](https://github.com/Wytamma/GISAIDR/blob/master/R/core.R)).
-     - WHO updates and variant announcements (e.g., [WHO News](https://www.who.int/news/item/27-10-2022-tag-ve-statement-on-omicron-sublineages-bq.1-and-xbb)).
+     - [GISAID]([https://gisaid.org/](https://gisaid.org/hcov19-variants/))
+     - [GISAIDR](https://github.com/Wytamma/GISAIDR/blob/master/R/core.R)
+     - [WHO News](https://www.who.int/news/item/27-10-2022-tag-ve-statement-on-omicron-sublineages-bq.1-and-xbb)
    - **Example Expansion**:
-     - Alpha: `B.1.1.7 / Q.*`
-     - Delta: `B.1.617.2 / AY.*`
-     - Omicron: `B.1.1.529 / BA.*`
-   - **Rules**: Add direct aliases to the list and merge sublineages for better generalization, such as combining `BA.*` and `XBB` under Omicron.
+     - Alpha: `B.1.1.7 = Q`
+     - Delta: `B.1.617.2 = AY`
+     - Omicron: `B.1.1.529 = BA`
+   - **Purpose**: Add direct aliases to the base list and merge sublineages into their common ancestors for better coverage, such as combining all `BA` and `XBB` sublineages into their respective categories.
 
 3. **Reference Table Creation**:
-   - **Source**: Extract data from [PANGO Consensus Sequences Summary](https://github.com/corneliusroemer/pango-sequences/blob/main/data/pango-consensus-sequences_summary.json) available on GitHub.
-   - **Purpose**: Form the reference table `nextstrain` for aliasing and unaliasing PANGO lineages.
+   - **Source**: Extract data from [PANGO Consensus Sequences Summary](https://github.com/corneliusroemer/pango-sequences/blob/main/data/pango-consensus-sequences_summary.json) and [PANGO Designation Alias Key](https://github.com/cov-lineages/pango-designation/blob/master/pango_designation/alias_key.json) available on GitHub.
+   - **Purpose**: Form the reference table `metadata` for aliasing and unaliasing PANGO lineages.
 
-4. **Unaliasing Lineages**:
+4. **Lineage Unaliasing**:
    - **SQL Query**:
      ```sql
+     SELECT * FROM (
      SELECT a.lineage,
             a.wholabel,
             GROUP_CONCAT(DISTINCT b.unaliased) AS c
-     FROM   annotation AS a
-            LEFT JOIN nextstrain AS b
+     FROM   mapping AS a
+            LEFT JOIN metadata AS b
                    ON a.lineage = b.lineage
                     OR b.lineage LIKE a.lineage || '.%'
      GROUP BY a.lineage, a.wholabel
      ORDER BY a.wholabel ASC
-     WHERE  c IS NOT NULL AND lineage != c;
+     ) WHERE  c IS NOT NULL AND lineage != c;
      ```
-   - **Purpose**: Identify the root lineage of a given lineage from the base list through unaliasing. Identify the most specific common parents of similar sublineages to formulate matching rules with the largest coverage. For example, if `CH.1.1` maps to `B.1.1.529.2.75.3.4.1.1.1.1`, and `B.1.1.529.*` is Omicron, then `CH.*` should be classified as Omicron.
+   - **Purpose**: Identify the root lineage of a given lineage from the base list through unaliasing. Determine the most specific common ancestors of similar sublineages to formulate matching rules with broadder coverage. For example, if `CH.1.1` maps to `B.1.1.529.2.75.3.4.1.1.1.1`, and `B.1.1.529.*` is Omicron, then `CH.*` should be classified as Omicron.
 
-5. **Alias Finding**:
+5. **Lineage Aliasing**:
    - **SQL Query**:
      ```sql
      SELECT GROUP_CONCAT(DISTINCT a.lineage),
@@ -286,37 +254,38 @@ You do not have to perform any of the following to do the conversion. The follow
             SUBSTR(b.lineage, 1, INSTR(b.lineage, '.') - 1) AS plin,
             GROUP_CONCAT(b.lineage),
             GROUP_CONCAT(DISTINCT b.unaliased)
-     FROM   annotation AS a
-            LEFT JOIN nextstrain AS b
+     FROM   mapping AS a
+            LEFT JOIN metadata AS b
                    ON unaliased = a.lineage
                     OR unaliased LIKE a.lineage || '.%'
      GROUP BY plin
      ORDER BY a.wholabel, plin ASC;
      ```
-   - **Purpose**: Identify all possible aliases for a given lineage. Focus particularly on Omicron due to its extensive number of sublineages.
+   - **Purpose**: Identify all possible aliases for a given lineage, with a particular focus on Omicron due to its numerous sublineages and descendants.
 
-6. **New Lineages Identification**:
+6. **Cross-Checking**:
    - **SQL Query**:
      ```sql
      WITH lineage_cte AS (
-         SELECT SUBSTR(lineage, 1, INSTR(lineage, '.') - 1) AS plin
-         FROM nextstrain
-         WHERE nextstrainclade LIKE '23_'
-           AND SUBSTR(lineage, 1, INSTR(lineage, '.') - 1) != ''
-         GROUP BY plin
+         SELECT SUBSTR(lineage, 1, INSTR(lineage, '.') - 1) AS plin,
+                nextclade
+         FROM metadata
+         WHERE nextclade LIKE '23_' AND plin != ''
+         GROUP BY plin, nextclade
      )
      SELECT plin,
+            nextclade,
             b.lineage
      FROM lineage_cte AS a
-     LEFT JOIN covariants AS b
+     LEFT JOIN mapping AS b
          ON b.lineage = a.plin
      WHERE b.lineage IS NULL;
      ```
-   - **Purpose**: Check for new PANGO lineages that may not be present in the base list, focusing on Omicron variants which frequently introduce new lineages.
+   - **Purpose**: Identify lineages that may be missing from the list but should be labeled according to the Nextstrain Clade consensus (e.g., `23I` mapping to `Omicron`) using data from [CoVariants](https://covariants.org/). Pay special attention to Omicron, given its frequent emergence of new recombinant lineages.
 
-Manual inspection is involved in each step to ensure accurate generalisation and concise addition of new matching rules.
+Manual inspection is involved at each step to ensure accurate generalisation and concise addition of new matching rules.
 
-The file `mapping.core.csv` represents the final output of the process described above. The `generate_full_mapping.py` script is then executed to produce `mapping.full.json`.
+The file `mapping.core.csv` represents the final output of the process described above. The `generate_full_mapping.py` script is then executed to produce `mapping.full.json`, which includes more detailed information for direct lookup.
 
 </details>
 
