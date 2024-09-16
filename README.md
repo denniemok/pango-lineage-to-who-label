@@ -1,10 +1,12 @@
-# PANGO Lineage -> WHO Label for COVID-19 Analysis
+# PANGO Lineage ➜ WHO Label
 
-This project aims to provide a generalised conversion scheme that maps PANGO lineages (like `B.1.1.529` and `AY.2`) to their corresponding WHO labels or names (like `Omicron` and `Delta`).
+This project aims to provide a mapping scheme that converts PANGO lineages (like `B.1.1.529` and `AY.2`) to their corresponding WHO labels or names (like `Omicron` and `Delta`). The goal is to facilitate general statistical studies on COVID-19 variants and to make the conversion process more easily accessible.
 
-The ability to swiftly convert between PANGO lineages and WHO labels can streamline data analysis and make COVID-19 statistics more accessible to the general public and non-specialists.
+Most COVID-19 statistics aggregate all cases without distinguishing between variants. While some resources do group data by variant type, they often use technical strain names that cater primarily to scientific audience.
 
-For instance, using our mapping scheme allows for the correct labeling of more than 85% of [GISAID EpiCoV](https://gisaid.org/) records (tested with over 200,000 entries from Australia). The remaining unlabeled records may belong to recombinant lineages, newly identified lineages, lineages not labeled by WHO, or records without a lineage designation.
+That is where this tool comes in handy — it quickly adds a WHO labels column to your data, making it easy to compile statistics for the general public using the variant names we all know.
+
+For example, our mapping scheme can accurately assign WHO labels to over 85% of [GISAID EpiCoV](https://gisaid.org/) records (tested with over 200,000 Australia entries). The rest were mostly recombinant lineages, new lineages, or records without a lineage designation.
 
 <h3>Core Mapping List: <a href="https://github.com/denniemok/pango-lineage-to-who-label/blob/main/mapping.core.csv">mapping.core.csv</a> | <a href="https://github.com/denniemok/pango-lineage-to-who-label/blob/main/mapping.core.sql">mapping.core.sql</a> (03Sep24)</h3>
 
@@ -14,24 +16,15 @@ For instance, using our mapping scheme allows for the correct labeling of more t
   <summary>Supported WHO Labels</summary>
   <br>
   Alpha, Beta, Gamma, Delta, Epsilon, Zeta, Eta, Theta, Iota, Kappa, Lambda, Mu, Omicron
-  <br><br>
-</details>
-
-<details>
-  <summary>Supported PANGO Lineages</summary>
-  <br>
-  All key lineages on <a href="https://github.com/cov-lineages/pango-designation">Cov-Lineages dataset</a> and <a href="https://github.com/corneliusroemer/pango-sequences">PANGO consensus sequences dataset</a>.<br><br>
-</details>
-
-<details>
-  <summary>What are WHO Labels?</summary>
   <br>
   WHO label is a standardized nomenclature used by the World Health Organization (WHO) to classify and refer to different COVID-19 variants. By utilising Greek alphabets (e.g., Alpha, Beta), it simplifies communication and help the general public, media, and health officials easily understand and refer to these variants.
   <br><br>
 </details>
 
 <details>
-  <summary>Who are PANGO Lineages?</summary>
+  <summary>Supported PANGO Lineages</summary>
+  <br>
+  All key lineages on <a href="https://github.com/cov-lineages/pango-designation">Cov-Lineages dataset</a> and <a href="https://github.com/corneliusroemer/pango-sequences">PANGO consensus sequences dataset</a>.
   <br>
   PANGO (Phylogenetic Assignment of Named Global Outbreak) lineages are a system for naming and tracking the COVID-19 lineages. These lineages can have shorter alias names to simplify the representation of lineage names that can become quite lengthy as new sublineages are identified.
   <br><br>
@@ -54,6 +47,8 @@ For instance, using our mapping scheme allows for the correct labeling of more t
   For example, mapping "B.1.1.529.1" to its shorter alias "BA.1" would be considered alias mapping.
   <br><br>
 </details>
+
+[![Video](https://img.youtube.com/vi/pC1GHlDrvfI/0.jpg)](https://www.youtube.com/watch?v=pC1GHlDrvfI)
 
 ## Approximate Lookup (Core Mapping)
 
