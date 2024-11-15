@@ -48,7 +48,7 @@ For example, our mapping scheme can accurately assign WHO labels to over 85% of 
   <br><br>
 </details>
 
-[![Video](https://img.youtube.com/vi/pC1GHlDrvfI/0.jpg)](https://www.youtube.com/watch?v=pC1GHlDrvfI)
+[![Demo Video](https://i.imgur.com/xGfOCsd.png)](https://www.youtube.com/watch?v=pC1GHlDrvfI)
 
 ## Approximate Lookup (Core Mapping)
 
